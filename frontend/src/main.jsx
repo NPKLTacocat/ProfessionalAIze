@@ -8,6 +8,9 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import App from "./App.jsx";
 
+import GeminiDemo from "./GeminiDemo.jsx";
+
+
 const theme = createTheme({
   palette: {
     mode: "dark",
@@ -19,6 +22,9 @@ createRoot(document.getElementById("root")).render(
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <App />
+
+      <GeminiDemo />
+
     </ThemeProvider>
   </StrictMode>
 );

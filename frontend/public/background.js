@@ -3,7 +3,17 @@
 // Handle messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "processText") {
-    processTextWithGemini(request.text)
+    let realExample;
+
+    if (request.example == "") {
+      realExample = `We remain committed to delivering innovative solutions that align 
+                     with our clients’ strategic objectives while maintaining the highest 
+                     standards of integrity and excellence.`
+    } else {
+      realExample = request.example;
+    }
+    
+    processTextWithGemini(request.text, realExample)
       .then((response) => sendResponse({ success: true, data: response }))
       .catch((error) => sendResponse({ success: false, error: error.message }));
 
@@ -12,7 +22,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-async function processTextWithGemini(inputText) {
+
+async function processTextWithGemini(inputText, example) {
   try {
     // Get API key from storage
     const result = await chrome.storage.sync.get(["geminiApiKey"]);
@@ -37,9 +48,12 @@ async function processTextWithGemini(inputText) {
             {
               parts: [
                 {
-                  text: `You are an AI assistant meant to refine users' prompts to make them sound formal and professional.
-Don't change the contents of the sentence, just make it sound better and appealing to recruiters.
-User message: "${inputText}"`,
+                  text: `you are ai assistant meant to refine users' prompts to replicate the format of a given example
+                        to rewrite a given prompt. Dont change the contents of the sentence, just take this prompt: "${inputText}" 
+                        and style it like in this example: "${example}". Replicate both tone, typing style, and any other
+                        factors to make it seem like the new message was written by the same person who wrote the example.  
+                        Do not include anything in your response but the new message replicating the example's style.`,
+
                 },
               ],
             },
