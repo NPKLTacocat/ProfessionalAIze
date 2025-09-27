@@ -9,6 +9,13 @@ import {
   CircularProgress,
   Alert,
   Link,
+  Autocomplete,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  createFilterOptions,
 } from "@mui/material";
 import {
   Send as SendIcon,
@@ -18,12 +25,16 @@ import {
 
 function App() {
   const [inputText, setInputText] = useState("");
-
   const [exampleText, setExampleText] = useState("");
-
+  const [toneText, setToneText] = useState(null);
+  const [dialogText, setDialogText] = useState("");
+  const [open, toggleOpen] = useState(false);
   const [outputText, setOutputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiKeyExists, setApiKeyExists] = useState(false);
+
+  const filter = createFilterOptions();
+  const options = ["Professional", "Casual", "Friendly", "Formal", "Humorous"];
 
   // Check if API key exists on component mount
   useEffect(() => {
@@ -42,6 +53,17 @@ function App() {
   const handleExampleChange = (event) => {
     const text = event.target.value;
     setExampleText(text);
+  };
+
+  const handleClose = () => {
+    setDialogText("");
+    toggleOpen(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setToneText(dialogText);
+    handleClose();
   };
 
   const handleSend = async () => {
@@ -229,8 +251,98 @@ function App() {
             />
           </Box>
 
-          {/* Send Button Bar */}
-          <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
+          {/* Prompt Selection and Send Button Bar */}
+          <Box
+            sx={{ display: "flex", justifyContent: "flex-end", p: 1, gap: 1 }}
+          >
+            <Autocomplete
+              value={toneText}
+              onChange={(event, newValue) => {
+                if (typeof newValue === "string") {
+                  // Only open dialog if it's NOT one of the predefined options
+                  if (!options.includes(newValue)) {
+                    setTimeout(() => {
+                      toggleOpen(true);
+                      setDialogText(newValue);
+                    }, 0);
+                  } else {
+                    setToneText(newValue);
+                  }
+                } else if (newValue && newValue.inputValue) {
+                  // Custom option selected
+                  setTimeout(() => {
+                    toggleOpen(true);
+                    setDialogText(newValue.inputValue);
+                  }, 0);
+                } else {
+                  setToneText(newValue);
+                }
+              }}
+              filterOptions={(options, params) => {
+                const filtered = filter(options, params);
+
+                if (
+                  params.inputValue !== "" &&
+                  !options.includes(params.inputValue)
+                ) {
+                  filtered.push({
+                    inputValue: params.inputValue,
+                    label: `Add "${params.inputValue}"`,
+                  });
+                }
+
+                return filtered;
+              }}
+              id="tone-select"
+              options={options}
+              getOptionLabel={(option) => {
+                if (typeof option === "string") {
+                  return option;
+                }
+                if (option.inputValue) {
+                  return option.inputValue;
+                }
+                return option;
+              }}
+              selectOnFocus
+              clearOnBlur
+              handleHomeEndKeys
+              renderOption={(props, option) => {
+                const label =
+                  typeof option === "string"
+                    ? option
+                    : option.label || option.inputValue;
+                return <li {...props}>{label}</li>;
+              }}
+              sx={{ width: "150px" }}
+              freeSolo
+              renderInput={(params) => <TextField {...params} label="Tone" />}
+            ></Autocomplete>
+            <Dialog open={open} onClose={handleClose}>
+              <form onSubmit={handleSubmit}>
+                <DialogTitle>Specify Custom Tone</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    Please specify your custom tone:
+                  </DialogContentText>
+                  <TextField
+                    autoFocus
+                    margin="dense"
+                    id="tone"
+                    value={dialogText}
+                    onChange={(e) => setDialogText(e.target.value)}
+                    label="Tone"
+                    type="text"
+                    variant="standard"
+                  ></TextField>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleClose}>Cancel</Button>
+                  <Button type="submit">OK</Button>
+                </DialogActions>
+              </form>
+            </Dialog>
+
             <Button
               variant="contained"
               size="small"
