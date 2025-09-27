@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:extension": "vite build && npm run copy:extension-files",
-    "copy:extension-files": "cp public/manifest.json dist/ && cp public/background.js dist/ && cp public/options.html dist/ && cp public/options.js dist/",
+    "copy:extension-files": "cp public/manifest.json dist/ && cp public/background.js dist/ && cp public/options.html dist/ && cp -r public/css dist/ && cp -r public/js dist/",
     "lint": "eslint .",
     "preview": "vite preview"
   },
