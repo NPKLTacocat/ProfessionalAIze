@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "ProfessionalAIze",
+  "version": "1.0.0",
+  "description": "Transform your casual text into professional, recruiter-friendly language using AI",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "ProfessionalAIze - Make Your Text Professional"
+  },
+  "options_page": "options.html",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  Container,
   Typography,
   TextField,
   Paper,
@@ -8,15 +7,29 @@ import {
   Button,
   Divider,
   CircularProgress,
+  Alert,
+  Link,
 } from "@mui/material";
-import { Send as SendIcon, AutoAwesome as AIIcon } from "@mui/icons-material";
-import { Layout } from "./components";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  Send as SendIcon,
+  AutoAwesome as AIIcon,
+  Settings as SettingsIcon,
+} from "@mui/icons-material";
 
 function App() {
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKeyExists, setApiKeyExists] = useState(false);
+
+  // Check if API key exists on component mount
+  useEffect(() => {
+    if (typeof chrome !== "undefined" && chrome.storage) {
+      chrome.storage.sync.get(["geminiApiKey"], (result) => {
+        setApiKeyExists(!!result.geminiApiKey);
+      });
+    }
+  }, []);
 
   const handleInputChange = (event) => {
     const text = event.target.value;
@@ -27,28 +40,32 @@ function App() {
     if (!inputText.trim()) return;
 
     setIsLoading(true);
-    setOutputText(""); // Clear previous output
+    setOutputText("");
 
     try {
-      const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-      const aiPrompt = `
-      You are an AI assistant meant to refine users' prompts to make them sound formal and professional.
-      Don't change the contents of the sentence, just make it sound better and appealing to recruiters.
-      User message: "${inputText}"
-      `;
-
-      const result = await model.generateContent(aiPrompt);
-      const responseText = result.response.text();
-
-      setOutputText(responseText);
+      // Use Chrome extension messaging to background script
+      if (typeof chrome !== "undefined" && chrome.runtime) {
+        chrome.runtime.sendMessage(
+          { action: "processText", text: inputText },
+          (response) => {
+            setIsLoading(false);
+            if (response.success) {
+              setOutputText(response.data);
+            } else {
+              setOutputText(`Error: ${response.error}`);
+            }
+          }
+        );
+      } else {
+        // Fallback for development
+        setOutputText(
+          "Chrome extension API not available. This works only as a Chrome extension."
+        );
+        setIsLoading(false);
+      }
     } catch (err) {
-      console.error("Gemini API Error:", err);
-      setOutputText(
-        "Error: Failed to generate response. Please check your API key and try again."
-      );
-    } finally {
+      console.error("Extension Error:", err);
+      setOutputText("Error: Failed to process text. Please try again.");
       setIsLoading(false);
     }
   };
@@ -59,153 +76,183 @@ function App() {
     }
   };
 
-  return (
-    <Layout>
-      <Container
-        maxWidth="md"
-        sx={{
-          height: "calc(100vh - 64px)", // Full height minus header
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          py: 2,
-        }}
-      >
-        <Typography
-          variant="h4"
-          component="h1"
-          textAlign="center"
-          gutterBottom
-          sx={{ mb: 4 }}
-        >
-          ProfessionalAIze
-        </Typography>
+  const openOptions = () => {
+    if (typeof chrome !== "undefined" && chrome.runtime) {
+      chrome.runtime.openOptionsPage();
+    }
+  };
 
+  return (
+    <Box
+      sx={{
+        width: "400px",
+        height: "600px",
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "background.default",
+        overflow: "hidden",
+      }}
+    >
+      {/* Header */}
+      <Box sx={{ p: 2, bgcolor: "primary.main", color: "white" }}>
         <Box
           sx={{
-            width: "100%",
-            maxWidth: "800px",
             display: "flex",
-            flexDirection: "column",
-            gap: 3,
             alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          {/* Input Box */}
-          <Paper
-            elevation={3}
-            sx={{
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-            }}
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            ProfessionalAIze
+          </Typography>
+          <Button
+            size="small"
+            onClick={openOptions}
+            sx={{ color: "white", minWidth: "auto", p: 1 }}
           >
-            <Box sx={{ p: 3, pb: 2 }}>
-              <Typography variant="h6" gutterBottom color="primary">
-                Input
-              </Typography>
+            <SettingsIcon fontSize="small" />
+          </Button>
+        </Box>
+      </Box>
 
-              <TextField
-                multiline
-                rows={8}
-                variant="outlined"
-                placeholder="Enter your text to make it sound more professional... (Ctrl+Enter to send)"
-                value={inputText}
-                onChange={handleInputChange}
-                onKeyPress={handleKeyPress}
-                disabled={isLoading}
-                sx={{
-                  width: "100%",
-                  "& .MuiOutlinedInput-root": {
-                    alignItems: "flex-start",
-                  },
-                }}
-              />
-            </Box>
+      {/* API Key Warning */}
+      {!apiKeyExists && (
+        <Alert severity="warning" sx={{ m: 1 }}>
+          <Typography variant="body2">
+            API key required. Click{" "}
+            <Link onClick={openOptions} sx={{ cursor: "pointer" }}>
+              Settings
+            </Link>{" "}
+            to configure.
+          </Typography>
+        </Alert>
+      )}
 
-            {/* Bottom Bar with Send Button */}
-            <Divider />
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-                p: 2,
-                backgroundColor: "background.default",
-              }}
-            >
-              <Button
-                variant="contained"
-                endIcon={
-                  isLoading ? (
-                    <CircularProgress size={20} color="inherit" />
-                  ) : (
-                    <SendIcon />
-                  )
-                }
-                onClick={handleSend}
-                disabled={!inputText.trim() || isLoading}
-                sx={{
-                  minWidth: "120px",
-                  position: "relative",
-                }}
-              >
-                {isLoading ? "Processing..." : "Send"}
-              </Button>
-            </Box>
-          </Paper>
-
-          {/* Output Box */}
-          <Paper
-            elevation={3}
-            sx={{
-              width: "100%",
-              minHeight: "300px",
-              p: 3,
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <Typography variant="h6" gutterBottom color="secondary">
-              Professional Output
-              <AIIcon
-                sx={{ ml: 1, verticalAlign: "middle", fontSize: "1.2rem" }}
-              />
+      {/* Content */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          p: 2,
+          gap: 2,
+          overflow: "hidden",
+        }}
+      >
+        {/* Input Box */}
+        <Paper
+          elevation={2}
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+          }}
+        >
+          <Box sx={{ p: 2, pb: 1 }}>
+            <Typography variant="subtitle2" color="primary" gutterBottom>
+              Input Text
             </Typography>
+            <TextField
+              multiline
+              variant="outlined"
+              placeholder="Enter casual text to make it professional..."
+              value={inputText}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              disabled={isLoading || !apiKeyExists}
+              size="small"
+              sx={{
+                width: "100%",
+                "& .MuiOutlinedInput-root": {
+                  minHeight: "120px",
+                  alignItems: "flex-start",
+                },
+                "& .MuiInputBase-inputMultiline": {
+                  minHeight: "100px !important",
+                  overflow: "auto !important",
+                },
+              }}
+            />
+          </Box>
 
+          {/* Send Button Bar */}
+          <Divider />
+          <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
+            <Button
+              variant="contained"
+              size="small"
+              endIcon={
+                isLoading ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <SendIcon />
+                )
+              }
+              onClick={handleSend}
+              disabled={!inputText.trim() || isLoading || !apiKeyExists}
+              sx={{ minWidth: "80px" }}
+            >
+              {isLoading ? "..." : "Send"}
+            </Button>
+          </Box>
+        </Paper>
+
+        {/* Output Box */}
+        <Paper
+          elevation={2}
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+          }}
+        >
+          <Box
+            sx={{
+              p: 2,
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+            }}
+          >
+            <Typography variant="subtitle2" color="secondary" gutterBottom>
+              Professional Output{" "}
+              <AIIcon sx={{ fontSize: "1rem", verticalAlign: "middle" }} />
+            </Typography>
             <Box
               sx={{
-                flexGrow: 1,
+                flex: 1,
                 border: 1,
                 borderColor: "divider",
                 borderRadius: 1,
-                p: 2,
+                p: 1.5,
                 backgroundColor: "background.paper",
                 overflow: "auto",
-                minHeight: "200px",
+                minHeight: 0,
               }}
             >
               <Typography
-                variant="body1"
+                variant="body2"
                 sx={{
                   whiteSpace: "pre-wrap",
                   wordBreak: "break-word",
                   color: outputText ? "text.primary" : "text.secondary",
                   fontStyle: outputText ? "normal" : "italic",
-                  lineHeight: 1.6,
+                  lineHeight: 1.4,
+                  fontSize: "0.875rem",
                 }}
               >
                 {isLoading
-                  ? "✨ AI is making your text more professional..."
-                  : outputText ||
-                    "Your professionally refined text will appear here..."}
+                  ? "✨ Making your text professional..."
+                  : outputText || "Professional text will appear here..."}
               </Typography>
             </Box>
-          </Paper>
-        </Box>
-      </Container>
-    </Layout>
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
   );
 }
 
