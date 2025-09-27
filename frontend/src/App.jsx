@@ -18,7 +18,9 @@ import {
 
 function App() {
   const [inputText, setInputText] = useState("");
+
   const [exampleText, setExampleText] = useState("");
+
   const [outputText, setOutputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiKeyExists, setApiKeyExists] = useState(false);
@@ -37,10 +39,12 @@ function App() {
     setInputText(text);
   };
 
+
   const handleExampleChange = (event) => {
     const text = event.target.value;
     setExampleText(text);
   };
+
 
   const handleSend = async () => {
     if (!inputText.trim()) return;
@@ -52,7 +56,9 @@ function App() {
       // Use Chrome extension messaging to background script
       if (typeof chrome !== "undefined" && chrome.runtime) {
         chrome.runtime.sendMessage(
+
           { action: "processText", text: inputText , example: exampleText},
+
           (response) => {
             setIsLoading(false);
             if (response.success) {
@@ -145,7 +151,9 @@ function App() {
           overflow: "hidden",
         }}
       >
+
         {/* Example Box */}
+
         <Paper
           elevation={2}
           sx={{
@@ -153,6 +161,7 @@ function App() {
             display: "flex",
             flexDirection: "column",
             minHeight: 0,
+
             overflow: "auto"
           }}
         >
@@ -192,6 +201,7 @@ function App() {
             flexDirection: "column",
             minHeight: 0,
             overflow: "auto"
+
           }}
         >
           <Box sx={{ p: 2, pb: 1 }}>
@@ -201,7 +211,9 @@ function App() {
             <TextField
               multiline
               variant="outlined"
+
               placeholder="Enter casual text to retone it..."
+
               value={inputText}
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
@@ -220,7 +232,9 @@ function App() {
               }}
             />
           </Box>
+
           </Paper>
+
 
           {/* Send Button Bar */}
           <Divider />
@@ -243,6 +257,8 @@ function App() {
             </Button>
           </Box>
 
+
+
         {/* Output Box */}
         <Paper
           elevation={2}
@@ -263,7 +279,9 @@ function App() {
             }}
           >
             <Typography variant="subtitle2" color="secondary" gutterBottom>
+
               Formatted Output{" "}
+
               <AIIcon sx={{ fontSize: "1rem", verticalAlign: "middle" }} />
             </Typography>
             <Box

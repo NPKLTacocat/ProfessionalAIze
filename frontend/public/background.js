@@ -22,6 +22,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+
 async function processTextWithGemini(inputText, example) {
   try {
     // Get API key from storage
@@ -52,6 +53,7 @@ async function processTextWithGemini(inputText, example) {
                         and style it like in this example: "${example}". Replicate both tone, typing style, and any other
                         factors to make it seem like the new message was written by the same person who wrote the example.  
                         Do not include anything in your response but the new message replicating the example's style.`,
+
                 },
               ],
             },
