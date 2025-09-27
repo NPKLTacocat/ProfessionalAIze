@@ -7,23 +7,49 @@ import {
   Box,
   Button,
   Divider,
+  CircularProgress,
 } from "@mui/material";
-import { Send as SendIcon } from "@mui/icons-material";
+import { Send as SendIcon, AutoAwesome as AIIcon } from "@mui/icons-material";
 import { Layout } from "./components";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 function App() {
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (event) => {
     const text = event.target.value;
     setInputText(text);
   };
 
-  const handleSend = () => {
-    if (inputText.trim()) {
-      // Process the input text (replace with your logic)
-      setOutputText(`You sent: ${inputText}`);
+  const handleSend = async () => {
+    if (!inputText.trim()) return;
+
+    setIsLoading(true);
+    setOutputText(""); // Clear previous output
+
+    try {
+      const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_KEY);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+      const aiPrompt = `
+      You are an AI assistant meant to refine users' prompts to make them sound formal and professional.
+      Don't change the contents of the sentence, just make it sound better and appealing to recruiters.
+      User message: "${inputText}"
+      `;
+
+      const result = await model.generateContent(aiPrompt);
+      const responseText = result.response.text();
+
+      setOutputText(responseText);
+    } catch (err) {
+      console.error("Gemini API Error:", err);
+      setOutputText(
+        "Error: Failed to generate response. Please check your API key and try again."
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -84,10 +110,11 @@ function App() {
                 multiline
                 rows={8}
                 variant="outlined"
-                placeholder="Enter your text here... (Ctrl+Enter to send)"
+                placeholder="Enter your text to make it sound more professional... (Ctrl+Enter to send)"
                 value={inputText}
                 onChange={handleInputChange}
                 onKeyPress={handleKeyPress}
+                disabled={isLoading}
                 sx={{
                   width: "100%",
                   "& .MuiOutlinedInput-root": {
@@ -110,14 +137,21 @@ function App() {
             >
               <Button
                 variant="contained"
-                endIcon={<SendIcon />}
+                endIcon={
+                  isLoading ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <SendIcon />
+                  )
+                }
                 onClick={handleSend}
-                disabled={!inputText.trim()}
+                disabled={!inputText.trim() || isLoading}
                 sx={{
-                  minWidth: "100px",
+                  minWidth: "120px",
+                  position: "relative",
                 }}
               >
-                Send
+                {isLoading ? "Processing..." : "Send"}
               </Button>
             </Box>
           </Paper>
@@ -134,7 +168,10 @@ function App() {
             }}
           >
             <Typography variant="h6" gutterBottom color="secondary">
-              Output
+              Professional Output
+              <AIIcon
+                sx={{ ml: 1, verticalAlign: "middle", fontSize: "1.2rem" }}
+              />
             </Typography>
 
             <Box
@@ -155,9 +192,14 @@ function App() {
                   whiteSpace: "pre-wrap",
                   wordBreak: "break-word",
                   color: outputText ? "text.primary" : "text.secondary",
+                  fontStyle: outputText ? "normal" : "italic",
+                  lineHeight: 1.6,
                 }}
               >
-                {outputText || "Your output will appear here..."}
+                {isLoading
+                  ? "✨ AI is making your text more professional..."
+                  : outputText ||
+                    "Your professionally refined text will appear here..."}
               </Typography>
             </Box>
           </Paper>
