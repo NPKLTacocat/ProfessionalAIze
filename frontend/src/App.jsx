@@ -103,7 +103,14 @@ function App() {
       }}
     >
       {/* Header */}
-      <Box sx={{ p: 2, bgcolor: "primary.main", color: "white" }}>
+      <Box
+        sx={{
+          p: 0.75,
+          bgcolor: "primary.main",
+          color: "white",
+          paddingLeft: 2,
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -126,15 +133,27 @@ function App() {
 
       {/* API Key Warning */}
       {!apiKeyExists && (
-        <Alert severity="warning" sx={{ m: 1 }}>
-          <Typography variant="body2">
-            API key required. Click{" "}
-            <Link onClick={openOptions} sx={{ cursor: "pointer" }}>
-              Settings
-            </Link>{" "}
-            to configure.
-          </Typography>
-        </Alert>
+        <Box
+          sx={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10,
+          }}
+        >
+          <Alert severity="warning" sx={{ m: 1, position: "absolute" }}>
+            <Typography variant="body2">
+              API key required. Click{" "}
+              <Link onClick={openOptions} sx={{ cursor: "pointer" }}>
+                Settings
+              </Link>{" "}
+              to configure.
+            </Typography>
+          </Alert>
+        </Box>
       )}
 
       {/* Content */}
@@ -162,7 +181,7 @@ function App() {
             </Typography>
             <TextField
               multiline
-              rows={4}
+              rows={2}
               variant="outlined"
               placeholder="Enter example text for tone (optional, professional default)..."
               value={exampleText}
@@ -209,29 +228,27 @@ function App() {
               }}
             />
           </Box>
+
+          {/* Send Button Bar */}
+          <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
+            <Button
+              variant="contained"
+              size="small"
+              endIcon={
+                isLoading ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <SendIcon />
+                )
+              }
+              onClick={handleSend}
+              disabled={!inputText.trim() || isLoading || !apiKeyExists}
+              sx={{ minWidth: "80px" }}
+            >
+              {isLoading ? "..." : "Send"}
+            </Button>
+          </Box>
         </Paper>
-
-        {/* Send Button Bar */}
-        <Divider />
-        <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
-          <Button
-            variant="contained"
-            size="small"
-            endIcon={
-              isLoading ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : (
-                <SendIcon />
-              )
-            }
-            onClick={handleSend}
-            disabled={!inputText.trim() || isLoading || !apiKeyExists}
-            sx={{ minWidth: "80px" }}
-          >
-            {isLoading ? "..." : "Send"}
-          </Button>
-        </Box>
-
         {/* Output Box */}
         <Paper
           elevation={2}
