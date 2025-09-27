@@ -5,7 +5,10 @@
   "description": "Transform your casual text into professional, recruiter-friendly language using AI",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "contextMenus",
+    "scripting",
+    "notifications"
   ],
   "host_permissions": [
     "https://generativelanguage.googleapis.com/*"

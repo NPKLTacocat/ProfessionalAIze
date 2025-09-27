@@ -21,6 +21,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 });
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "SelectedText") {
+    // info.selectionText is automatically provided by Chrome
+    const selectedText = info.selectionText;
+
+    if (selectedText) {
+      // Now you can process with Gemini directly
+      processTextWithGemini(selectedText, "")
+        .then((response) => {
+          // Show result in a notification (or send back to content script)
+          chrome.notifications.create({
+            type: "basic",
+            iconUrl: "icon.png",
+            title: "ProfessionalAIze",
+            message: response,
+          });
+        })
+        .catch((err) => {
+          console.error("Gemini error:", err);
+        });
+    }
+  }
+});
 
 
 async function processTextWithGemini(inputText, example) {
@@ -67,7 +90,7 @@ async function processTextWithGemini(inputText, example) {
     if (!response.ok) {
       throw new Error(data.error?.message || "Failed to process text");
     }
-
+    console.log("Gemini response data:", data.candidates[0].content.parts[0].text);
     return data.candidates[0].content.parts[0].text;
   } catch (error) {
     console.error("Gemini API Error:", error);
@@ -81,4 +104,9 @@ chrome.runtime.onInstalled.addListener((details) => {
     // Open options page on first install
     chrome.runtime.openOptionsPage();
   }
+  chrome.contextMenus.create({
+    id: "SelectedText",
+    title: "ProfessionalAIze Selected Text",
+    contexts: ["selection"],
+  });
 });
