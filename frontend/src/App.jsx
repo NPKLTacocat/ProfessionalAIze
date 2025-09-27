@@ -39,12 +39,10 @@ function App() {
     setInputText(text);
   };
 
-
   const handleExampleChange = (event) => {
     const text = event.target.value;
     setExampleText(text);
   };
-
 
   const handleSend = async () => {
     if (!inputText.trim()) return;
@@ -56,8 +54,7 @@ function App() {
       // Use Chrome extension messaging to background script
       if (typeof chrome !== "undefined" && chrome.runtime) {
         chrome.runtime.sendMessage(
-
-          { action: "processText", text: inputText , example: exampleText},
+          { action: "processText", text: inputText, example: exampleText },
 
           (response) => {
             setIsLoading(false);
@@ -147,30 +144,25 @@ function App() {
           display: "flex",
           flexDirection: "column",
           p: 2,
-          gap: 2,
-          overflow: "hidden",
+          gap: 1.5,
+          overflow: "auto",
         }}
       >
-
         {/* Example Box */}
-
         <Paper
           elevation={2}
           sx={{
-            flex: 1,
             display: "flex",
             flexDirection: "column",
-            minHeight: 0,
-
-            overflow: "auto"
           }}
         >
-          <Box sx={{ p: 2, pb: 1 }}>
+          <Box sx={{ p: 2 }}>
             <Typography variant="subtitle2" color="primary" gutterBottom>
               Example Text
             </Typography>
             <TextField
               multiline
+              rows={4}
               variant="outlined"
               placeholder="Enter example text for tone (optional, professional default)..."
               value={exampleText}
@@ -181,39 +173,29 @@ function App() {
               sx={{
                 width: "100%",
                 "& .MuiOutlinedInput-root": {
-                  minHeight: "120px",
                   alignItems: "flex-start",
-                },
-                "& .MuiInputBase-inputMultiline": {
-                  minHeight: "120px !important",
-                  overflow: "auto !important",
                 },
               }}
             />
           </Box>
         </Paper>
-        
+
         <Paper
           elevation={2}
           sx={{
-            flex: 1,
             display: "flex",
             flexDirection: "column",
-            minHeight: 0,
-            overflow: "auto"
-
           }}
         >
-          <Box sx={{ p: 2, pb: 1 }}>
+          <Box sx={{ p: 2 }}>
             <Typography variant="subtitle2" color="primary" gutterBottom>
               Input Text
             </Typography>
             <TextField
               multiline
+              rows={4}
               variant="outlined"
-
               placeholder="Enter casual text to retone it..."
-
               value={inputText}
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
@@ -222,42 +204,33 @@ function App() {
               sx={{
                 width: "100%",
                 "& .MuiOutlinedInput-root": {
-                  minHeight: "120px",
                   alignItems: "flex-start",
-                },
-                "& .MuiInputBase-inputMultiline": {
-                  minHeight: "100px !important",
-                  overflow: "auto !important",
                 },
               }}
             />
           </Box>
+        </Paper>
 
-          </Paper>
-
-
-          {/* Send Button Bar */}
-          <Divider />
-          <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
-            <Button
-              variant="contained"
-              size="small"
-              endIcon={
-                isLoading ? (
-                  <CircularProgress size={16} color="inherit" />
-                ) : (
-                  <SendIcon />
-                )
-              }
-              onClick={handleSend}
-              disabled={!inputText.trim() || isLoading || !apiKeyExists}
-              sx={{ minWidth: "80px" }}
-            >
-              {isLoading ? "..." : "Send"}
-            </Button>
-          </Box>
-
-
+        {/* Send Button Bar */}
+        <Divider />
+        <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
+          <Button
+            variant="contained"
+            size="small"
+            endIcon={
+              isLoading ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <SendIcon />
+              )
+            }
+            onClick={handleSend}
+            disabled={!inputText.trim() || isLoading || !apiKeyExists}
+            sx={{ minWidth: "80px" }}
+          >
+            {isLoading ? "..." : "Send"}
+          </Button>
+        </Box>
 
         {/* Output Box */}
         <Paper
@@ -266,7 +239,7 @@ function App() {
             flex: 1,
             display: "flex",
             flexDirection: "column",
-            minHeight: 0,
+            minHeight: "150px",
           }}
         >
           <Box
@@ -279,9 +252,7 @@ function App() {
             }}
           >
             <Typography variant="subtitle2" color="secondary" gutterBottom>
-
               Formatted Output{" "}
-
               <AIIcon sx={{ fontSize: "1rem", verticalAlign: "middle" }} />
             </Typography>
             <Box
