@@ -21,14 +21,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 });
+
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "SelectedText") {
+    console.log(info.selectionText)
     // info.selectionText is automatically provided by Chrome
     const selectedText = info.selectionText;
+    const realExample = `We remain committed to delivering innovative solutions that align 
+                     with our clients’ strategic objectives while maintaining the highest 
+                     standards of integrity and excellence.`
 
     if (selectedText) {
       // Now you can process with Gemini directly
-      processTextWithGemini(selectedText, "")
+      processTextWithGemini(selectedText, realExample)
         .then((response) => {
           // Show result in a notification (or send back to content script)
           chrome.notifications.create({
