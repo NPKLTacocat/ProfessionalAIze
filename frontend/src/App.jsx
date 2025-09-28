@@ -201,7 +201,7 @@ function App() {
           }}
         >
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            ProfessionalAIze
+            <img src="icons/iconLight.png" alt="Extension Icon" style={{ width: 32, height: 32 }} /> ProfessionalAIze
           </Typography>
           <Button
             size="small"

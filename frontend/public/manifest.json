@@ -15,7 +15,8 @@
   },
   "action": {
     "default_popup": "index.html",
-    "default_title": "ProfessionalAIze - Make Your Text Professional"
+    "default_title": "ProfessionalAIze - Make Your Text Professional",
+    "default_icon": "./icons/iconBlack.png"
   },
   "options_page": "options.html",
   "content_security_policy": {
