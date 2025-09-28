@@ -74,27 +74,27 @@ function App() {
     }
   }, []);
 
-const [shouldAutoSend, setShouldAutoSend] = useState(false);
+  const [shouldAutoSend, setShouldAutoSend] = useState(false);
 
-useEffect(() => {
-  if (typeof chrome !== "undefined" && chrome.runtime) {
-    const port = chrome.runtime.connect({ name: "popupReady" });
+  useEffect(() => {
+    if (typeof chrome !== "undefined" && chrome.runtime) {
+      const port = chrome.runtime.connect({ name: "popupReady" });
 
-    port.onMessage.addListener((msg) => {
-      if (msg.action === "prefillText") {
-        setInputText(msg.text);
-        setShouldAutoSend(true);
-      }
-    });
-  }
-}, []);
+      port.onMessage.addListener((msg) => {
+        if (msg.action === "prefillText") {
+          setInputText(msg.text);
+          setShouldAutoSend(true);
+        }
+      });
+    }
+  }, []);
 
-useEffect(() => {
-  if (shouldAutoSend && inputText.trim()) {
-    handleSend();
-    setShouldAutoSend(false);
-  }
-}, [shouldAutoSend, inputText]);
+  useEffect(() => {
+    if (shouldAutoSend && inputText.trim()) {
+      handleSend();
+      setShouldAutoSend(false);
+    }
+  }, [shouldAutoSend, inputText]);
 
   const handleInputChange = (event) => {
     const newInputText = event.target.value;
@@ -222,10 +222,13 @@ useEffect(() => {
             justifyContent: "space-between",
           }}
         >
-          <img src="icons/iconLight.png" alt="Extension Icon" 
-            style={{ width: 32, height: 32, display: "block", marginTop: 1}} />
+          <img
+            src="icons/iconLight.png"
+            alt="Extension Icon"
+            style={{ width: 32, height: 32, display: "block", marginTop: 1 }}
+          />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-             ProfessionalAIze
+            ProfessionalAIze
           </Typography>
           <Button
             size="small"
@@ -492,7 +495,7 @@ useEffect(() => {
                 }}
               >
                 {isLoading
-                  ? "✨ Making your text professional..."
+                  ? "✨ ProfessionalAIzing your text ..."
                   : outputText || "Professional text will appear here..."}
               </Typography>
             </Box>
