@@ -1,6 +1,6 @@
 # ProfessionalAIze 🚀
 
-> Transform your casual text into professional, recruiter-friendly language using AI
+> Your intelligent communication assistant, powered by AI, that helps refine your every word into tailored tones and styles 
 
 You will need ProfessionalAIze because sometimes "yo, gimme dat job" needs to become "Dear Hiring Manager, I am writing to express my interest…"
 
