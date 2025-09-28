@@ -22,33 +22,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId === "SelectedText") {
-    console.log(info.selectionText)
-    // info.selectionText is automatically provided by Chrome
-    const selectedText = info.selectionText;
-    const realExample = `We remain committed to delivering innovative solutions that align 
-                     with our clients’ strategic objectives while maintaining the highest 
-                     standards of integrity and excellence.`
+chrome.contextMenus.create({
+  id: "openExtensionPopup",
+  title: "Open Extension",
+  contexts: ["all"]
+});
 
-    if (selectedText) {
-      // Now you can process with Gemini directly
-      processTextWithGemini(selectedText, realExample)
-        .then((response) => {
-          // Show result in a notification (or send back to content script)
-          chrome.notifications.create({
-            type: "basic",
-            iconUrl: "icon.png",
-            title: "ProfessionalAIze",
-            message: response,
-          });
-        })
-        .catch((err) => {
-          console.error("Gemini error:", err);
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "SelectedText" && info.selectionText) {
+    const selectedText = info.selectionText;
+
+    chrome.windows.create(
+      {
+        url: chrome.runtime.getURL("index.html"),
+        type: "popup",
+        width: 400,
+        height: 600,
+      },
+      (newWindow) => {
+        // Wait until popup loads, then send selected text
+        chrome.runtime.onConnect.addListener(function portListener(port) {
+          if (port.name === "popupReady") {
+            port.postMessage({ action: "prefillText", text: selectedText });
+            chrome.runtime.onConnect.removeListener(portListener);
+          }
         });
-    }
+      }
+    );
   }
 });
+
 
 
 async function processTextWithGemini(inputText, example) {
