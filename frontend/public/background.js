@@ -51,8 +51,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
-
-
 async function processTextWithGemini(inputText, example, tone) {
   try {
     // Get API key from storage
@@ -80,8 +78,8 @@ async function processTextWithGemini(inputText, example, tone) {
                 {
                   text: `you are ai assistant meant to refine users' prompts to replicate the format of a given example
                         to rewrite a given prompt. Dont change the contents of the sentence, just take this prompt: "${inputText}" ${example} and in the a tone of: "${tone}". Replicate typing style, and any other
-                        factors to make it seem like the new message was written by the same person who wrote the example.  
-                        Do not include anything in your response but the new message replicating the example's style.`,
+                        factors to make it seem like the new message was written by the same person who wrote the example. Additionally, make sure to also grade the original response on how well it fits the tone on a scale of 1-100. 
+                        Do not include anything in your response but the score on one line in a format of "Score: <score>/100" and then new message replicating the example's style on another line.`,
                 },
               ],
             },
@@ -95,7 +93,10 @@ async function processTextWithGemini(inputText, example, tone) {
     if (!response.ok) {
       throw new Error(data.error?.message || "Failed to process text");
     }
-    console.log("Gemini response data:", data.candidates[0].content.parts[0].text);
+    console.log(
+      "Gemini response data:",
+      data.candidates[0].content.parts[0].text
+    );
     return data.candidates[0].content.parts[0].text;
   } catch (error) {
     console.error("Gemini API Error:", error);
