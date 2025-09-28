@@ -83,7 +83,7 @@ function App() {
       port.onMessage.addListener((msg) => {
         if (msg.action === "prefillText") {
           setInputText(msg.text);
-          setShouldAutoSend(true);
+          setShouldAutoSend(false); //change to true depending if default feature is proffesional tone
         }
       });
     }
