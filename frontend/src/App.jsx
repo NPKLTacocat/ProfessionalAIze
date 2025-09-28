@@ -289,7 +289,7 @@ useEffect(() => {
               multiline
               rows={2}
               variant="outlined"
-              placeholder="Enter example text for tone (optional, professional default)..."
+              placeholder="Enter example text for format (optional)..."
               value={exampleText}
               onChange={handleExampleChange}
               onKeyPress={handleKeyPress}
