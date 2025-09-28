@@ -6,12 +6,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     let realExample;
     let realTone;
 
-    if (request.example == "") {
-      realExample = `We remain committed to delivering innovative solutions that align 
-                     with our clients’ strategic objectives while maintaining the highest 
-                     standards of integrity and excellence.`;
+    if (!request.example == "") {
+      realExample =
+        ` and style it like in this example: "` + request.example + `"`;
     } else {
-      realTone = request.tone;
+      realExample = request.example;
     }
 
     if (request.tone == "") {
@@ -54,8 +53,7 @@ async function processTextWithGemini(inputText, example, tone) {
               parts: [
                 {
                   text: `you are ai assistant meant to refine users' prompts to replicate the format of a given example
-                        to rewrite a given prompt. Dont change the contents of the sentence, just take this prompt: "${inputText}" 
-                        and style it like in this example: "${example}" and in the a tone of: "${tone}". Replicate typing style, and any other
+                        to rewrite a given prompt. Dont change the contents of the sentence, just take this prompt: "${inputText}" ${example} and in the a tone of: "${tone}". Replicate typing style, and any other
                         factors to make it seem like the new message was written by the same person who wrote the example.  
                         Do not include anything in your response but the new message replicating the example's style.`,
                 },
