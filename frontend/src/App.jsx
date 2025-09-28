@@ -26,7 +26,7 @@ import {
 function App() {
   const [inputText, setInputText] = useState("");
   const [exampleText, setExampleText] = useState("");
-  const [toneText, setToneText] = useState(null);
+  const [toneText, setToneText] = useState("Professional");
   const [dialogText, setDialogText] = useState("");
   const [open, toggleOpen] = useState(false);
   const [outputText, setOutputText] = useState("");
@@ -34,25 +34,56 @@ function App() {
   const [apiKeyExists, setApiKeyExists] = useState(false);
 
   const filter = createFilterOptions();
-  const options = ["Professional", "Casual", "Friendly", "Formal", "Humorous"];
+  const [options, setOptions] = useState([
+    "Professional",
+    "Casual",
+    "Friendly",
+    "Formal",
+    "Humorous",
+  ]);
 
   // Check if API key exists on component mount
   useEffect(() => {
     if (typeof chrome !== "undefined" && chrome.storage) {
-      chrome.storage.sync.get(["geminiApiKey"], (result) => {
-        setApiKeyExists(!!result.geminiApiKey);
-      });
+      chrome.storage.sync.get(
+        ["geminiApiKey", "customTones", "newExampleText", "newInputText"],
+        (result) => {
+          setApiKeyExists(!!result.geminiApiKey);
+
+          if (result.customTones && Array.isArray(result.customTones)) {
+            const defaultTones = [
+              "Professional",
+              "Casual",
+              "Friendly",
+              "Formal",
+              "Humorous",
+            ];
+            const allTones = [...defaultTones, ...result.customTones];
+            setOptions(allTones);
+          }
+
+          if (result.newExampleText) {
+            setExampleText(result.newExampleText);
+          }
+
+          if (result.newInputText) {
+            setInputText(result.newInputText);
+          }
+        }
+      );
     }
   }, []);
 
   const handleInputChange = (event) => {
-    const text = event.target.value;
-    setInputText(text);
+    const newInputText = event.target.value;
+    chrome.storage.sync.set({ newInputText });
+    setInputText(newInputText);
   };
 
   const handleExampleChange = (event) => {
-    const text = event.target.value;
-    setExampleText(text);
+    const newExampleText = event.target.value;
+    chrome.storage.sync.set({ newExampleText });
+    setExampleText(newExampleText);
   };
 
   const handleClose = () => {
@@ -62,6 +93,30 @@ function App() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    let newOptions = options;
+
+    if (dialogText && !options.includes(dialogText)) {
+      newOptions = [...options, dialogText];
+      setOptions(newOptions);
+    }
+
+    if (typeof chrome !== "undefined" && chrome.storage) {
+      const defaultTones = [
+        "Professional",
+        "Casual",
+        "Friendly",
+        "Formal",
+        "Humorous",
+      ];
+      const customTones = newOptions.filter(
+        (tone) => !defaultTones.includes(tone)
+      );
+      chrome.storage.sync.set({ customTones });
+    }
+
+    let toneText = dialogText || toneText || "Professional";
+
     setToneText(dialogText);
     handleClose();
   };
@@ -76,7 +131,12 @@ function App() {
       // Use Chrome extension messaging to background script
       if (typeof chrome !== "undefined" && chrome.runtime) {
         chrome.runtime.sendMessage(
-          { action: "processText", text: inputText, example: exampleText },
+          {
+            action: "processText",
+            text: inputText,
+            example: exampleText,
+            tone: toneText,
+          },
 
           (response) => {
             setIsLoading(false);
