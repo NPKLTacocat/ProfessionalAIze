@@ -214,4 +214,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Made with ❤️ by:**
 - [Khang Tran](https://github.com/NPKLTacocat)
 - [Jose Colina Araque](https://github.com/RealShoheiOhtani)
-- [Gabe](https://github.com/GabeHasAGit)
+- [Gabriel Duenas](https://github.com/GabeHasAGit)
