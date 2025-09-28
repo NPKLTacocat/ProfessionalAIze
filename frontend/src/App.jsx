@@ -74,6 +74,28 @@ function App() {
     }
   }, []);
 
+const [shouldAutoSend, setShouldAutoSend] = useState(false);
+
+useEffect(() => {
+  if (typeof chrome !== "undefined" && chrome.runtime) {
+    const port = chrome.runtime.connect({ name: "popupReady" });
+
+    port.onMessage.addListener((msg) => {
+      if (msg.action === "prefillText") {
+        setInputText(msg.text);
+        setShouldAutoSend(true);
+      }
+    });
+  }
+}, []);
+
+useEffect(() => {
+  if (shouldAutoSend && inputText.trim()) {
+    handleSend();
+    setShouldAutoSend(false);
+  }
+}, [shouldAutoSend, inputText]);
+
   const handleInputChange = (event) => {
     const newInputText = event.target.value;
     chrome.storage.sync.set({ newInputText });

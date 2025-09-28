@@ -27,6 +27,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "SelectedText" && info.selectionText) {
+    const selectedText = info.selectionText;
+
+    chrome.windows.create(
+      {
+        url: chrome.runtime.getURL("index.html"),
+        type: "popup",
+        width: 400,
+        height: 600,
+      },
+      (newWindow) => {
+        // Wait until popup loads, then send selected text
+        chrome.runtime.onConnect.addListener(function portListener(port) {
+          if (port.name === "popupReady") {
+            port.postMessage({ action: "prefillText", text: selectedText });
+            chrome.runtime.onConnect.removeListener(portListener);
+          }
+        });
+      }
+    );
+  }
+});
+
+
+
 async function processTextWithGemini(inputText, example, tone) {
   try {
     // Get API key from storage
@@ -69,7 +95,7 @@ async function processTextWithGemini(inputText, example, tone) {
     if (!response.ok) {
       throw new Error(data.error?.message || "Failed to process text");
     }
-
+    console.log("Gemini response data:", data.candidates[0].content.parts[0].text);
     return data.candidates[0].content.parts[0].text;
   } catch (error) {
     console.error("Gemini API Error:", error);
@@ -83,4 +109,9 @@ chrome.runtime.onInstalled.addListener((details) => {
     // Open options page on first install
     chrome.runtime.openOptionsPage();
   }
+  chrome.contextMenus.create({
+    id: "SelectedText",
+    title: "ProfessionalAIze Selected Text",
+    contexts: ["selection"],
+  });
 });
