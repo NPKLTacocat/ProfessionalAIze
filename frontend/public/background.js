@@ -22,12 +22,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-chrome.contextMenus.create({
-  id: "openExtensionPopup",
-  title: "Open Extension",
-  contexts: ["all"]
-});
-
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "SelectedText" && info.selectionText) {
     const selectedText = info.selectionText;
