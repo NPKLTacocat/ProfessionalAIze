@@ -222,8 +222,10 @@ useEffect(() => {
             justifyContent: "space-between",
           }}
         >
+          <img src="icons/iconLight.png" alt="Extension Icon" 
+            style={{ width: 32, height: 32, display: "block", marginTop: 1}} />
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            <img src="icons/iconLight.png" alt="Extension Icon" style={{ width: 32, height: 32 }} /> ProfessionalAIze
+             ProfessionalAIze
           </Typography>
           <Button
             size="small"
@@ -266,7 +268,7 @@ useEffect(() => {
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          p: 2,
+          p: 1,
           gap: 1.5,
           overflow: "auto",
         }}
